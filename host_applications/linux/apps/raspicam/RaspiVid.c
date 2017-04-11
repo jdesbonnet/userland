@@ -1045,10 +1045,27 @@ static FILE *open_filename(RASPIVID_STATE *pState, char *filename)
    FILE *new_handle = NULL;
    char *tempname = NULL;
 
+   char *temp_ts_str = NULL;
+
+   struct timespec ts;
+
    if (pState->segmentSize || pState->splitWait)
    {
       // Create a new filename string
-      asprintf(&tempname, filename, pState->segmentNumber);
+
+      // Experimental segment timestamping (JD)
+      // If %s in filename expression use ms timestamp, else sequential counter.
+      if (strstr(filename,"%s")!=NULL) {
+         clock_gettime(CLOCK_REALTIME,&ts);
+         asprintf(&temp_ts_str,"%d.%03d",(int)ts.tv_sec,(int)(ts.tv_nsec/1000000));
+         asprintf(&tempname, filename, temp_ts_str);
+         free(temp_ts_str);
+      } 
+      else
+      {
+         asprintf(&tempname, filename, pState->segmentNumber);
+      }
+
       filename = tempname;
    }
 
