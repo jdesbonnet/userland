@@ -1814,6 +1814,7 @@ int main(int argc, const char **argv)
 
                if (state.datetime)
                {
+/*
                   time_t rawtime;
                   struct tm *timeinfo;
 
@@ -1829,6 +1830,20 @@ int main(int argc, const char **argv)
                   frame += timeinfo->tm_min;
                   frame *= 100;
                   frame += timeinfo->tm_sec;
+*/
+                  struct timespec timestamp;
+                  clock_gettime(CLOCK_REALTIME, &timestamp);
+
+                  int secondOfDay = timestamp.tv_sec % (24*3600);
+                  int minuteOfDay = secondOfDay / 60;
+                  int hourOfDay = secondOfDay / 3600;
+                  frame = hourOfDay;
+                  frame *= 100;
+                  frame += minuteOfDay % 60;
+                  frame *= 100;
+                  frame += secondOfDay % 60;
+                  frame *= 1000;
+                  frame += timestamp.tv_nsec / 1000000;
                }
                if (state.timestamp)
                {
